@@ -1,0 +1,70 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 配置Handler -->
+    <bean id="itemsController" name="/queryItems.action" class="com.example.cj.springmvc.controller.ItemsController"/>
+    <bean id="itemsController2" name="/queryItems2.action" class="com.example.cj.springmvc.controller.ItemsController2"/>
+
+    <!-- 处理器映射器
+    将bean的name作为url进行查找，需要在配置Handler时指定beanname(就是url)
+    -->
+    <bean class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping"/>
+
+    <!-- 简单url映射-->
+    <bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="mappings">
+            <props>
+                <!-- 对 itemsController进行url映射-->
+                <prop key="/queryItems1.action">itemsController</prop>
+                <prop key="/queryItems2.action">itemsController2</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- 处理器适配器 -->
+    <!--要求编写的Handler实现Controller接口-->
+    <bean class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter"/>
+    <!--要求编写的Handler实现HttpRequestHandler接口-->
+    <bean class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"/>
+
+    <!-- 使用mvc:annotation-driven代替上面两个注解映射器和注解适配的配置
+    mvc:annotation-driven默认加载很多的参数绑定方法，
+    比如json转换解析器默认加载了，如果使用mvc:annotation-driven则不用配置上面的RequestMappingHandlerMapping和RequestMappingHandlerAdapter
+    实际开发时使用mvc:annotation-driven
+    -->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!--&lt;!&ndash; 注解的映射器 &ndash;&gt;-->
+    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"/>-->
+
+    <!--&lt;!&ndash; 注解的适配器 &ndash;&gt;-->
+    <!--<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"/>-->
+
+    <context:component-scan base-package="com.example.cj.springmvc.controller"/>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <!-- 转换器 -->
+        <property name="converters">
+            <list>
+                <!-- 日期类型转换 -->
+                <bean class="com.example.cj.springmvc.controller.converter.CustomDateConverter"/>
+            </list>
+        </property>
+    </bean>
+
+
+    <!-- 视图解析器
+    解析jsp,默认使用jstl,classpath下要有jstl的包
+    -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!-- 配置jsp路径的前缀 -->
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <!-- 配置jsp路径的后缀 -->
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+</beans>
